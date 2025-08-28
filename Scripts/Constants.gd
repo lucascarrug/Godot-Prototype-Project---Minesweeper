@@ -10,6 +10,9 @@ const ORANGE_TILE: Vector2i = Vector2i(2,0)
 const DARK_ORANGE_TILE: Vector2i = Vector2i(3,0)
 const FLAG_TILE: Vector2i = Vector2i(4,0)
 
+## Bomb map.
+const BOMB = -1
+
 ## Exploration map.
 enum ExplorationMapStates {NOT_EXPLORED, EXPLORED, FLAG}
 

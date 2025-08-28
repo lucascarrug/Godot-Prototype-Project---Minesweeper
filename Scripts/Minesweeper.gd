@@ -7,17 +7,21 @@ class_name Minesweeper
 @export var orangetable: TileMapLayer
 
 var C = Constants.new()
+
 var exploration_map: Array[Array] = []
 var mine_map: Array[Array] = []
+var mines_set: bool = false
 
 func _ready():
 	set_greentable()
 	set_orangetable()
 	set_exploration_map()
+	set_mine_map()
 
 func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("left_click"):
 		var tile_pos: Vector2i = get_clicked_tile()
+		if not mines_set: set_mines(tile_pos)
 		explore(tile_pos)
 	if Input.is_action_just_pressed("right_click"):
 		var tile_pos: Vector2i = get_clicked_tile()
@@ -38,6 +42,35 @@ func set_orangetable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
 		for x in range(0, max_x):
 			atlas = get_orangetable_atlas(x,y)
 			orangetable.set_cell(Vector2i(x,y), 0, atlas)
+
+## MINE MAP
+
+func set_mine_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -> void:
+	for y in range(0, max_y):
+		var col: Array[int] = []
+		for x in range(0, max_x):
+			col.append(0)
+		mine_map.append(col)
+
+func set_mines(first_pos: Vector2i) -> void:
+	# Set number of mines.
+	var mine_quantity = 10
+	# Save mine positions.
+	var mine_positions: Array[Vector2i] = []
+	# Mines added counter.
+	var mines_added = 0
+	
+	while mines_added < mine_quantity:
+		var x = randi() % C.MAP_SIZE_X
+		var y = randi() % C.MAP_SIZE_Y
+		var new_mine: Vector2i = Vector2i(x,y)
+		print(mines_added, ": New mine: ", new_mine)
+			
+		if not mine_positions.has(new_mine) and new_mine != first_pos: 
+			mine_positions.append(new_mine)
+			mines_added += 1
+	
+	mines_set = true
 
 ## EXPLORATION MAP
 
