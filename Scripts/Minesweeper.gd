@@ -1,9 +1,10 @@
 extends Node2D
 class_name Minesweeper
 
+@export var flagtable: TileMapLayer
 @export var greentable: TileMapLayer
-@export var orangetable: TileMapLayer
 @export var spritetable: TileMapLayer
+@export var orangetable: TileMapLayer
 
 var C = Constants.new()
 var exploration_map: Array[Array] = []
@@ -52,10 +53,15 @@ func explore(tile_pos: Vector2i) -> void:
 		exploration_map[tile_pos.y][tile_pos.x] = C.ExplorationMapStates.EXPLORED
 
 func toggle_flag(tile_pos: Vector2i) -> void:
-	if exploration_map[tile_pos.y][tile_pos.x] == C.ExplorationMapStates.FLAG:
-		exploration_map[tile_pos.y][tile_pos.x] = C.ExplorationMapStates.NOT_EXPLORED
-	elif exploration_map[tile_pos.y][tile_pos.x] == C.ExplorationMapStates.NOT_EXPLORED:
-		exploration_map[tile_pos.y][tile_pos.x] = C.ExplorationMapStates.FLAG
+	var x = tile_pos.x
+	var y = tile_pos.y
+	
+	if exploration_map[y][x] == C.ExplorationMapStates.FLAG:
+		exploration_map[y][x] = C.ExplorationMapStates.NOT_EXPLORED
+		flagtable.erase_cell(Vector2i(x,y))
+	elif exploration_map[y][x] == C.ExplorationMapStates.NOT_EXPLORED:
+		exploration_map[y][x] = C.ExplorationMapStates.FLAG
+		flagtable.set_cell(Vector2i(x,y), 0, C.FLAG_TILE)
 
 func print_exploration_map() -> void:
 	print("EXPLORATION MAP")
@@ -65,14 +71,14 @@ func print_exploration_map() -> void:
 func get_greentable_atlas(x: int, y: int) -> Vector2:
 	var sum: int = x + y
 	if (sum % 2) == 0:
-		return Vector2i(0,0)
-	return Vector2i(1,0)
+		return C.GREEN_TILE
+	return C.DARK_GREEN_TILE
 
 func get_orangetable_atlas(x: int, y: int) -> Vector2:
 	var sum: int = x + y
 	if (sum % 2) == 0:
-		return Vector2i(2,0)
-	return Vector2i(3,0)
+		return C.ORANGE_TILE
+	return C.DARK_ORANGE_TILE
 
 func get_clicked_tile() -> Vector2i:
 	var local_pos = get_local_mouse_position()

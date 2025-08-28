@@ -24,11 +24,16 @@ texture = ExtResource("2_eeevj")
 [sub_resource type="TileSet" id="TileSet_versi"]
 sources/0 = SubResource("TileSetAtlasSource_dsjvu")
 
-[node name="Minesweeper" type="Node2D" node_paths=PackedStringArray("greentable", "orangetable", "spritetable")]
+[node name="Minesweeper" type="Node2D" node_paths=PackedStringArray("flagtable", "greentable", "spritetable", "orangetable")]
 script = ExtResource("1_ybk6e")
+flagtable = NodePath("FlagTable")
 greentable = NodePath("GreenTable")
-orangetable = NodePath("OrangeTable")
 spritetable = NodePath("SpriteTable")
+orangetable = NodePath("OrangeTable")
+
+[node name="FlagTable" type="TileMapLayer" parent="."]
+z_index = 3
+tile_set = SubResource("TileSet_versi")
 
 [node name="GreenTable" type="TileMapLayer" parent="."]
 z_index = 2
