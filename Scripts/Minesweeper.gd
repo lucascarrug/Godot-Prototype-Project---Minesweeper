@@ -13,8 +13,10 @@ var mine_map: Array[Array] = []
 var mines_set: bool = false
 
 func _ready():
-	set_greentable()
-	set_orangetable()
+	reset_greentable()
+	reset_orangetable()
+	reset_flagtable()
+	reset_spritetable()
 	set_exploration_map()
 	set_mine_map()
 
@@ -30,19 +32,31 @@ func _input(event: InputEvent) -> void:
 		print_exploration_map()
 		print_mine_map()
 
-func set_greentable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+## RESET TABLES
+
+func reset_greentable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
 	var atlas: Vector2i
 	for y in range(0, max_y):
 		for x in range(0, max_x):
 			atlas = get_greentable_atlas(x,y)
 			greentable.set_cell(Vector2i(x,y), 0, atlas)
 
-func set_orangetable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+func reset_orangetable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
 	var atlas: Vector2i
 	for y in range(0, max_y):
 		for x in range(0, max_x):
 			atlas = get_orangetable_atlas(x,y)
 			orangetable.set_cell(Vector2i(x,y), 0, atlas)
+
+func reset_flagtable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+	for y in range(0, max_y):
+		for x in range(0, max_x):
+			flagtable.erase_cell(Vector2i(x,y))
+			
+func reset_spritetable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+	for y in range(0, max_y):
+		for x in range(0, max_x):
+			spritetable.erase_cell(Vector2i(x,y))
 
 ## MINE MAP
 
@@ -55,20 +69,24 @@ func set_mine_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -> void:
 
 func set_mines(first_pos: Vector2i) -> void:
 	# Set number of mines.
-	var mine_quantity = 10
+	var mine_quantity = C.MINE_QUANTITY
 	# Save mine positions.
 	var mine_positions: Array[Vector2i] = []
 	# Mines added counter.
 	var mines_added = 0
 	
 	while mines_added < mine_quantity:
+		# Random position for mine.
 		var x = randi() % C.MAP_SIZE_X
 		var y = randi() % C.MAP_SIZE_Y
 		var new_mine: Vector2i = Vector2i(x,y)
-			
-		if not mine_positions.has(new_mine) and new_mine != first_pos: 
-			mine_positions.append(new_mine)
-			mines_added += 1
+		
+		# Check if not repeated and not at first clicked cell.
+		if mine_positions.has(new_mine) or new_mine == first_pos: 
+			continue
+
+		mine_positions.append(new_mine)
+		mines_added += 1
 	
 	# Put mines.
 	for mine in mine_positions:
@@ -79,19 +97,12 @@ func set_mines(first_pos: Vector2i) -> void:
 	mines_set = true
 	
 	set_proximity(mine_positions)
-	set_sprite_table()
+	set_spritetable()
 
 func set_proximity(mine_positions: Array[Vector2i]) -> void:
-	# Set neightbors.
-	var neighbors := [
-		Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
-		Vector2i(-1,  0),                  Vector2i(1,  0),
-		Vector2i(-1,  1), Vector2i(0,  1), Vector2i(1,  1),
-	]
-	
 	# Add one to mine neightbors.
 	for mine in mine_positions:
-		for offset in neighbors:
+		for offset in C.NEIGHTBORS:
 			var x = mine[0] + offset[0]
 			var y = mine[1] + offset[1]
 			
@@ -103,12 +114,11 @@ func out_of_map(x: int, y: int):
 		return true
 	return false
 
-func set_sprite_table() -> void:
+func set_spritetable() -> void:
 	for x in C.MAP_SIZE_X:
 		for y in C.MAP_SIZE_Y:
 			if mine_map[y][x] > 0 and mine_map[y][x] <= 8:
 				var atlas_coords = C.number_tile[mine_map[y][x] - 1]
-				#print("minemap[", x, ",", y,"] -> atlas_coords: ", atlas_coords)
 				spritetable.set_cell(Vector2i(x,y), 0, atlas_coords)
 			elif mine_map[y][x] == -1:
 				spritetable.set_cell(Vector2i(x,y), 0, C.BOMB_TILE)
@@ -128,12 +138,6 @@ func set_exploration_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -
 		exploration_map.append(col)
 
 func explore(tile_pos: Vector2i) -> void:
-	var neighbors := [
-		Vector2i(-1,-1), Vector2i(0,-1), Vector2i(1,-1),
-		Vector2i(-1, 0),                 Vector2i(1, 0),
-		Vector2i(-1, 1), Vector2i(0, 1), Vector2i(1, 1),
-	]
-	
 	var x = tile_pos.x
 	var y = tile_pos.y
 	
@@ -142,7 +146,7 @@ func explore(tile_pos: Vector2i) -> void:
 			var tiles_to_erase: Array[Vector2i] = explore_neightbors(tile_pos)
 			
 			for tile in tiles_to_erase:
-				for offset in neighbors:
+				for offset in C.NEIGHTBORS:
 					# Get neightbor coords.
 					var nx = tile[0] + offset[0]
 					var ny = tile[1] + offset[1]
@@ -155,46 +159,35 @@ func explore(tile_pos: Vector2i) -> void:
 			
 			exploration_map[y][x] = C.ExplorationMapStates.EXPLORED
 			greentable.erase_cell(tile_pos)
-			
-		elif mine_map[y][x] == C.BOMB:
-			explode()
 		else:
 			exploration_map[y][x] = C.ExplorationMapStates.EXPLORED
 			greentable.erase_cell(tile_pos)
 		
 func explore_neightbors(first_neightbor: Vector2i) -> Array[Vector2i]:
-	# Define neightbors.
-	var neighbors := [
-		Vector2i(-1,-1), Vector2i(0,-1), Vector2i(1,-1),
-		Vector2i(-1, 0),                 Vector2i(1, 0),
-		Vector2i(-1, 1), Vector2i(0, 1), Vector2i(1, 1),
-	]
-	
 	# Set incomming and repeated neightbors arrays.
-	var clean_neightbors: Array[Vector2i] = []
-	var seen_neightbors: Array[Vector2i] = []
-	clean_neightbors.append(first_neightbor)
+	var queue: Array[Vector2i] = [first_neightbor]
+	var seen: Array[Vector2i] = []
 	
-	# While clean neightbors are not empty.
-	while not clean_neightbors.is_empty():
+	# While neightbor queue is not empty.
+	while not queue.is_empty():
+		
 		# Check every neightbor.
-		for offset in neighbors:
+		for offset in C.NEIGHTBORS:
 			# Get neightbor coords.
-			var x = clean_neightbors[0][0] + offset[0]
-			var y = clean_neightbors[0][1] + offset[1]
+			var x = queue[0][0] + offset[0]
+			var y = queue[0][1] + offset[1]
 			
 			# Check is in map.
 			if out_of_map(x,y): continue
 			
 			# If neightbor is 0 and not checked before.
-			if mine_map[y][x] == 0 and not seen_neightbors.has(Vector2i(x,y)) and not clean_neightbors.has(Vector2i(x,y)):
-				clean_neightbors.append(Vector2i(x,y))
+			if mine_map[y][x] == 0 and not seen.has(Vector2i(x,y)) and not queue.has(Vector2i(x,y)):
+				queue.append(Vector2i(x,y))
 		
-		var last = clean_neightbors.pop_front()
-		seen_neightbors.append(last)
-		print("New vector seen: ", last)
+		seen.append(queue.pop_front())
 	
-	return seen_neightbors
+	#print(seen)
+	return seen
 
 func explode() -> void:
 	print("EXPLODE")

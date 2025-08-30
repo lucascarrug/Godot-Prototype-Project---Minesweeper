@@ -29,8 +29,9 @@ var number_tile = [
 	SEVEN_TILE,
 	EIGHT_TILE]
 
-## Bomb map.
-const BOMB = -1
+## Mine map.
+const MINE = -1
+const MINE_QUANTITY = 10
 
 ## Exploration map.
 enum ExplorationMapStates {NOT_EXPLORED, EXPLORED, FLAG}
@@ -38,3 +39,10 @@ enum ExplorationMapStates {NOT_EXPLORED, EXPLORED, FLAG}
 ## TilemapLayer map.
 const MAP_SIZE_X: int = 8
 const MAP_SIZE_Y: int = 8
+
+## Extras.
+var NEIGHTBORS := [
+		Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
+		Vector2i(-1,  0),                  Vector2i(1,  0),
+		Vector2i(-1,  1), Vector2i(0,  1), Vector2i(1,  1),
+	]
