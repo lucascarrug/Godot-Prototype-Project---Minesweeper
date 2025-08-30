@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://b8jpdo05be2vp"]
 
 [ext_resource type="Script" uid="uid://by7et1ar7r5uj" path="res://Scripts/Minesweeper.gd" id="1_ybk6e"]
-[ext_resource type="Texture2D" uid="uid://cxlc15fja28pi" path="res://Assets/MinesweeperTileset.png" id="2_eeevj"]
+[ext_resource type="Texture2D" uid="uid://d2mv4e5lwk2gt" path="res://Assets/MinesweeperTilesetStyleWindows7.png" id="2_eeevj"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_dsjvu"]
 texture = ExtResource("2_eeevj")
@@ -20,6 +20,7 @@ texture = ExtResource("2_eeevj")
 4:1/0 = 0
 5:1/0 = 0
 6:1/0 = 0
+0:2/0 = 0
 
 [sub_resource type="TileSet" id="TileSet_versi"]
 sources/0 = SubResource("TileSetAtlasSource_dsjvu")

@@ -11,11 +11,15 @@ var C = Constants.new()
 var exploration_map: Array[Array] = []
 var mine_map: Array[Array] = []
 var mines_set: bool = false
+var can_touch: bool = true
 
 func _ready():
 	reset_game()
 
 func _input(event: InputEvent) -> void:
+	if not can_touch:
+		return
+		
 	if Input.is_action_just_pressed("left_click"):
 		var tile_pos: Vector2i = get_clicked_tile()
 		if not mines_set: set_mines(tile_pos)
@@ -146,8 +150,8 @@ func explore(tile_pos: Vector2i) -> void:
 	var x = tile_pos.x
 	var y = tile_pos.y
 	
-	# If explored exit.
-	if exploration_map[y][x] == C.ExplorationMapStates.EXPLORED:
+	# If explored exit or flag.
+	if not exploration_map[y][x] == C.ExplorationMapStates.NOT_EXPLORED:
 		return
 		
 	# If is 0.
@@ -203,7 +207,24 @@ func explore_neightbors(first_neightbor: Vector2i) -> void:
 	greentable.erase_cell(first_neightbor)
 
 func explode() -> void:
-	print("EXPLODE")
+	# Can't touch more.
+	can_touch = false
+	
+	# Create timer.
+	var timer = Timer.new()
+	timer.wait_time = 0.01
+	timer.one_shot
+	add_child(timer)
+	
+	# Go through the map.
+	for y in C.MAP_SIZE_Y:
+		for x in C.MAP_SIZE_X:
+			timer.start()
+			
+			greentable.erase_cell(Vector2i(x,y))
+			
+			# If explored not wait.
+			if exploration_map[y][x] == 0: await timer.timeout
 
 func toggle_flag(tile_pos: Vector2i) -> void:
 	var x = tile_pos.x

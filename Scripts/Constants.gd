@@ -18,6 +18,7 @@ const FIVE_TILE:  		Vector2i = Vector2i(3,1)
 const SIX_TILE:   		Vector2i = Vector2i(4,1)
 const SEVEN_TILE: 		Vector2i = Vector2i(5,1)
 const EIGHT_TILE: 		Vector2i = Vector2i(6,1)
+const CROSS_TILE:		Vector2i = Vector2i(0,2)
 
 var number_tile = [
 	ONE_TILE,
