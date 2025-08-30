@@ -221,8 +221,16 @@ func explode() -> void:
 		for x in C.MAP_SIZE_X:
 			timer.start()
 			
-			greentable.erase_cell(Vector2i(x,y))
+			# If flag where not bomb.
+			if mine_map[y][x] != C.MINE and exploration_map[y][x] == C.ExplorationMapStates.FLAG:
+				spritetable.set_cell(Vector2i(x,y), 0, C.CROSS_TILE)
 			
+			# If flag where bomb.
+			if mine_map[y][x] == C.MINE and exploration_map[y][x] == C.ExplorationMapStates.FLAG:
+				pass
+			else:
+				greentable.erase_cell(Vector2i(x,y))
+				
 			# If explored not wait.
 			if exploration_map[y][x] == 0: await timer.timeout
 
