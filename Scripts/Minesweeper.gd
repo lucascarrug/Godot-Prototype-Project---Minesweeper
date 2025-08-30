@@ -28,6 +28,7 @@ func _input(event: InputEvent) -> void:
 		toggle_flag(tile_pos)
 	if Input.is_action_just_pressed("space"):
 		print_exploration_map()
+		print_mine_map()
 
 func set_greentable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
 	var atlas: Vector2i
@@ -70,7 +71,23 @@ func set_mines(first_pos: Vector2i) -> void:
 			mine_positions.append(new_mine)
 			mines_added += 1
 	
+	# Put mines.
+	for mine in mine_positions:
+		var x = mine[0]
+		var y = mine[1]
+		mine_map[y][x] = -1
+	
 	mines_set = true
+	
+	set_proximity()
+
+func set_proximity() -> void:
+	pass
+
+func print_mine_map() -> void:
+	print("MINE MAP")
+	for y in range(0, mine_map.size()):
+		print(mine_map[y])
 
 ## EXPLORATION MAP
 
