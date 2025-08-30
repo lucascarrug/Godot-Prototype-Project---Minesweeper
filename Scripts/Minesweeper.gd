@@ -79,11 +79,31 @@ func set_mines(first_pos: Vector2i) -> void:
 	
 	mines_set = true
 	
-	set_proximity()
+	set_proximity(mine_positions)
 
-func set_proximity() -> void:
-	pass
+func set_proximity(mine_positions: Array[Vector2i]) -> void:
+	# Set neightbors.
+	var neighbors := [
+		Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
+		Vector2i(-1,  0),                  Vector2i(1,  0),
+		Vector2i(-1,  1), Vector2i(0,  1), Vector2i(1,  1),
+	]
+	
+	# Add one to mine neightbors.
+	for mine in mine_positions:
+		for offset in neighbors:
+			var x = mine[0] + offset[0]
+			var y = mine[1] + offset[1]
+			
+			if not out_of_map(x,y) and mine_map[y][x] != -1:
+				mine_map[y][x] += 1
 
+
+func out_of_map(x: int, y: int):
+	if x < 0 or x >= C.MAP_SIZE_X or y < 0 or y >= C.MAP_SIZE_Y:
+		return true
+	return false
+	
 func print_mine_map() -> void:
 	print("MINE MAP")
 	for y in range(0, mine_map.size()):
