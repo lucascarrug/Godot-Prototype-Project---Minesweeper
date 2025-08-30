@@ -13,12 +13,7 @@ var mine_map: Array[Array] = []
 var mines_set: bool = false
 
 func _ready():
-	reset_greentable()
-	reset_orangetable()
-	reset_flagtable()
-	reset_spritetable()
-	set_exploration_map()
-	set_mine_map()
+	reset_game()
 
 func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("left_click"):
@@ -33,6 +28,14 @@ func _input(event: InputEvent) -> void:
 		print_mine_map()
 
 ## RESET TABLES
+
+func reset_game() -> void:
+	reset_greentable()
+	reset_orangetable()
+	reset_flagtable()
+	reset_spritetable()
+	set_exploration_map()
+	set_mine_map()
 
 func reset_greentable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
 	var atlas: Vector2i
@@ -193,7 +196,9 @@ func explore_neightbors(first_neightbor: Vector2i) -> void:
 	
 			exploration_map[ny][nx] = C.ExplorationMapStates.EXPLORED
 			greentable.erase_cell(Vector2i(nx,ny))
+			flagtable.erase_cell(Vector2i(nx,ny))
 	
+	# Erase origin.
 	exploration_map[first_neightbor.y][first_neightbor.x] = C.ExplorationMapStates.EXPLORED
 	greentable.erase_cell(first_neightbor)
 
@@ -215,6 +220,8 @@ func print_exploration_map() -> void:
 	print("EXPLORATION MAP")
 	for y in range(0, exploration_map.size()):
 		print(exploration_map[y])
+
+## EXTRA
 
 func get_greentable_atlas(x: int, y: int) -> Vector2:
 	var sum: int = x + y
