@@ -1,6 +1,8 @@
 extends Node2D
 class_name Minesweeper
 
+signal screen_resized(size: Vector2i)
+
 @export var flagtable: TileMapLayer
 @export var greentable: TileMapLayer
 @export var spritetable: TileMapLayer
@@ -17,7 +19,6 @@ var bombs_left: int = C.MINE_QUANTITY
 var explore_counter: int = 0
 
 func _ready():
-	get_window().content_scale_size = Vector2i(C.MAP_SIZE_X * C.TILE_SIZE, C.MAP_SIZE_Y * C.TILE_SIZE + 80)
 	reset_game()
 
 func _input(event: InputEvent) -> void:
@@ -38,6 +39,7 @@ func _input(event: InputEvent) -> void:
 ## RESET TABLES
 
 func reset_game() -> void:
+	resize_screen()
 	reset_greentable()
 	reset_orangetable()
 	reset_flagtable()
@@ -45,6 +47,10 @@ func reset_game() -> void:
 	set_exploration_map()
 	set_mine_map()
 
+func resize_screen() -> void:
+	get_window().content_scale_size = Vector2i(C.MAP_SIZE_X * C.TILE_SIZE, C.MAP_SIZE_Y * C.TILE_SIZE + 40)
+	call_deferred("emit_signal", "screen_resized", get_window().content_scale_size)
+	
 func reset_greentable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
 	var atlas: Vector2i
 	for y in range(0, max_y):
@@ -217,7 +223,7 @@ func explode() -> void:
 	# Create timer.
 	var timer = Timer.new()
 	timer.wait_time = 0.01
-	timer.one_shot
+	timer.one_shot = true
 	add_child(timer)
 	
 	# Go through the map.
