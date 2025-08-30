@@ -32,14 +32,14 @@ var number_tile = [
 
 ## Mine map.
 const MINE = -1
-const MINE_QUANTITY = 10
+const MINE_QUANTITY = 15
 
 ## Exploration map.
 enum ExplorationMapStates {NOT_EXPLORED, EXPLORED, FLAG}
 
 ## TilemapLayer map.
-const MAP_SIZE_X: int = 8
-const MAP_SIZE_Y: int = 8
+const MAP_SIZE_X: int = 20
+const MAP_SIZE_Y: int = 20
 
 ## Extras.
 var NEIGHTBORS := [

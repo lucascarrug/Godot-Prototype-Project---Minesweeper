@@ -13,7 +13,11 @@ var mine_map: Array[Array] = []
 var mines_set: bool = false
 var can_touch: bool = true
 
+var bombs_left: int = C.MINE_QUANTITY
+var explore_counter: int = 0
+
 func _ready():
+	get_window().content_scale_size = Vector2i(C.MAP_SIZE_X * C.TILE_SIZE, C.MAP_SIZE_Y * C.TILE_SIZE + 80)
 	reset_game()
 
 func _input(event: InputEvent) -> void:
@@ -23,7 +27,7 @@ func _input(event: InputEvent) -> void:
 	if Input.is_action_just_pressed("left_click"):
 		var tile_pos: Vector2i = get_clicked_tile()
 		if not mines_set: set_mines(tile_pos)
-		explore(tile_pos)
+		if tile_pos != Vector2i(-100,-100): explore(tile_pos)
 	if Input.is_action_just_pressed("right_click"):
 		var tile_pos: Vector2i = get_clicked_tile()
 		toggle_flag(tile_pos)
@@ -266,4 +270,6 @@ func get_orangetable_atlas(x: int, y: int) -> Vector2:
 
 func get_clicked_tile() -> Vector2i:
 	var local_pos = get_local_mouse_position()
+	if local_pos.x < 0 or local_pos.y < 0:
+		return Vector2i(-100, -100)
 	return Vector2i(local_pos.x / C.TILE_SIZE, local_pos.y / C.TILE_SIZE)
