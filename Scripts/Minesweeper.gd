@@ -84,7 +84,8 @@ func set_mines(first_pos: Vector2i) -> void:
 		# Check if not repeated and not at first clicked cell.
 		if mine_positions.has(new_mine) or new_mine == first_pos: 
 			continue
-
+		
+		# Add if mine position is valid.
 		mine_positions.append(new_mine)
 		mines_added += 1
 	
@@ -138,32 +139,26 @@ func set_exploration_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -
 		exploration_map.append(col)
 
 func explore(tile_pos: Vector2i) -> void:
+	# Simplify coords.
 	var x = tile_pos.x
 	var y = tile_pos.y
 	
-	if exploration_map[y][x] == C.ExplorationMapStates.NOT_EXPLORED:
-		if mine_map[y][x] == 0:
-			var tiles_to_erase: Array[Vector2i] = explore_neightbors(tile_pos)
-			
-			for tile in tiles_to_erase:
-				for offset in C.NEIGHTBORS:
-					# Get neightbor coords.
-					var nx = tile[0] + offset[0]
-					var ny = tile[1] + offset[1]
-					
-					# Check is in map.
-					if out_of_map(nx,ny): continue
-			
-					exploration_map[ny][nx] = C.ExplorationMapStates.EXPLORED
-					greentable.erase_cell(Vector2i(nx,ny))
-			
-			exploration_map[y][x] = C.ExplorationMapStates.EXPLORED
-			greentable.erase_cell(tile_pos)
-		else:
-			exploration_map[y][x] = C.ExplorationMapStates.EXPLORED
-			greentable.erase_cell(tile_pos)
+	# If explored exit.
+	if exploration_map[y][x] == C.ExplorationMapStates.EXPLORED:
+		return
 		
-func explore_neightbors(first_neightbor: Vector2i) -> Array[Vector2i]:
+	# If is 0.
+	if mine_map[y][x] == 0:
+		explore_neightbors(tile_pos)
+	# If it is a mine.
+	elif mine_map[y][x] == C.MINE:
+		explode()
+	# If is a number.
+	else:
+		exploration_map[y][x] = C.ExplorationMapStates.EXPLORED
+		greentable.erase_cell(tile_pos)
+		
+func explore_neightbors(first_neightbor: Vector2i) -> void:
 	# Set incomming and repeated neightbors arrays.
 	var queue: Array[Vector2i] = [first_neightbor]
 	var seen: Array[Vector2i] = []
@@ -186,8 +181,21 @@ func explore_neightbors(first_neightbor: Vector2i) -> Array[Vector2i]:
 		
 		seen.append(queue.pop_front())
 	
-	#print(seen)
-	return seen
+	# Erase cells from seen.
+	for tile in seen:
+		for offset in C.NEIGHTBORS:
+			# Get neightbor coords.
+			var nx = tile[0] + offset[0]
+			var ny = tile[1] + offset[1]
+			
+			# Check is in map.
+			if out_of_map(nx,ny): continue
+	
+			exploration_map[ny][nx] = C.ExplorationMapStates.EXPLORED
+			greentable.erase_cell(Vector2i(nx,ny))
+	
+	exploration_map[first_neightbor.y][first_neightbor.x] = C.ExplorationMapStates.EXPLORED
+	greentable.erase_cell(first_neightbor)
 
 func explode() -> void:
 	print("EXPLODE")
