@@ -5,4 +5,5 @@
 ## Notes
 <p>Since the game is simple, all the Minesweeper logic is contained in a single script, which might make it harder to follow.</p>
 <p>As I'm not very experienced with UIs, the UI code is kept simple and is not highly optimized.</p>
+<p>In addition, I designed the .png assets myself, but the text font comes from https://www.dafont.com/es/segment7.font</p>
 <br>
