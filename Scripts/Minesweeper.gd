@@ -1,7 +1,7 @@
 extends Node2D
 class_name Minesweeper
 
-signal screen_resized(size: Vector2i)
+signal flags_left_modified(value: int)
 
 @export var flagtable: TileMapLayer
 @export var greentable: TileMapLayer
@@ -48,6 +48,7 @@ func reset_game() -> void:
 	mines_set = false
 	can_touch = true
 	flags_left = C.MINE_QUANTITY[game_difficulty]
+	call_deferred("emit_signal", "flags_left_modified", flags_left)
 	resize_screen()
 	reset_greentable()
 	reset_orangetable()
@@ -58,7 +59,6 @@ func reset_game() -> void:
 
 func resize_screen() -> void:
 	get_window().content_scale_size = Vector2i(C.MAP_SIZE_X[game_difficulty] * C.TILE_SIZE, C.MAP_SIZE_Y[game_difficulty] * C.TILE_SIZE + C.UI_SIZE)
-	call_deferred("emit_signal", "screen_resized", get_window().content_scale_size)
 	
 func reset_greentable():
 	var atlas: Vector2i
@@ -236,10 +236,18 @@ func explore_neightbors(first_neightbor: Vector2i) -> void:
 			
 			# Check is in map.
 			if out_of_map(nx,ny): continue
-	
+			
+			# Delete flag if exist.
+			if exploration_map[ny][nx] == C.ExplorationMapStates.FLAG:
+				flagtable.erase_cell(Vector2i(nx,ny))
+				flags_left += 1
+
+			# Delete neightbors.
 			exploration_map[ny][nx] = C.ExplorationMapStates.EXPLORED
 			greentable.erase_cell(Vector2i(nx,ny))
-			flagtable.erase_cell(Vector2i(nx,ny))
+			
+	# Modify flag counter.
+	flags_left_modified.emit(flags_left)
 	
 	# Erase origin.
 	exploration_map[first_neightbor.y][first_neightbor.x] = C.ExplorationMapStates.EXPLORED
@@ -280,9 +288,13 @@ func toggle_flag(tile_pos: Vector2i) -> void:
 	if exploration_map[y][x] == C.ExplorationMapStates.FLAG:
 		exploration_map[y][x] = C.ExplorationMapStates.NOT_EXPLORED
 		flagtable.erase_cell(Vector2i(x,y))
-	elif exploration_map[y][x] == C.ExplorationMapStates.NOT_EXPLORED:
+		flags_left += 1
+		flags_left_modified.emit(flags_left)
+	elif exploration_map[y][x] == C.ExplorationMapStates.NOT_EXPLORED and flags_left > 0:
 		exploration_map[y][x] = C.ExplorationMapStates.FLAG
 		flagtable.set_cell(Vector2i(x,y), 0, C.FLAG_TILE)
+		flags_left -= 1
+		flags_left_modified.emit(flags_left)
 
 func print_exploration_map() -> void:
 	print("EXPLORATION MAP")
