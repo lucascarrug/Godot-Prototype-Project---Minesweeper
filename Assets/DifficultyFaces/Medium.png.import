@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgeqcpckniq8y"
-path="res://.godot/imported/Hard.png-d97f21ad39b6496230f78f7ffe15369d.ctex"
+uid="uid://fx754d27kd8i"
+path="res://.godot/imported/Medium.png-048875592bbb287e17241af9fe8c941f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/DiffucultyFaces/Hard.png"
-dest_files=["res://.godot/imported/Hard.png-d97f21ad39b6496230f78f7ffe15369d.ctex"]
+source_file="res://Assets/DifficultyFaces/Medium.png"
+dest_files=["res://.godot/imported/Medium.png-048875592bbb287e17241af9fe8c941f.ctex"]
 
 [params]
 

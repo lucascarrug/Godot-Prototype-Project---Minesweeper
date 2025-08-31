@@ -2,6 +2,7 @@ extends Node2D
 class_name Minesweeper
 
 signal flags_left_modified(value: int)
+signal mines_explode
 
 @export var flagtable: TileMapLayer
 @export var greentable: TileMapLayer
@@ -256,6 +257,7 @@ func explore_neightbors(first_neightbor: Vector2i) -> void:
 func explode() -> void:
 	# Can't touch more.
 	can_touch = false
+	mines_explode.emit()
 	
 	# Create timer.
 	var timer = Timer.new()
