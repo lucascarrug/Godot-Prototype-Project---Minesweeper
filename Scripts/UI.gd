@@ -31,20 +31,22 @@ func _on_difficulty_button_item_selected(index: int) -> void:
 		1: difficulty_string = "Medium"
 		2: difficulty_string = "Hard"
 	
-	print(difficulty_string)
 	dead = false
 	win = false
+	difficulty_button.allow_reselect = false
 
 func _on_minesweeper_flags_left_modified(value: int) -> void:
 	flag_counter_label.text = str(value)
 
 func _on_minesweeper_mines_explode() -> void:
 	dead = true
+	difficulty_button.allow_reselect = true
 	face_texture.texture = faces.ActionFacesImages[difficulty_string]["Dead"]
 	difficulty_button.disabled = true
 
 func _on_minesweeper_win_game() -> void:
 	win = true
+	difficulty_button.allow_reselect = true
 	face_texture.texture = faces.ActionFacesImages[difficulty_string]["Win"]
 	print("UI: WIN")
 
