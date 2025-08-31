@@ -57,4 +57,5 @@ horizontal_alignment = 1
 position = Vector2(0, 40)
 
 [connection signal="item_selected" from="CenterContainer/HBoxContainer/DifficultyButton" to="." method="_on_difficulty_button_item_selected"]
+[connection signal="item_selected" from="CenterContainer/HBoxContainer/DifficultyButton" to="CenterContainer/Minesweeper" method="_on_difficulty_button_item_selected"]
 [connection signal="screen_resized" from="CenterContainer/Minesweeper" to="." method="_on_minesweeper_screen_resized"]

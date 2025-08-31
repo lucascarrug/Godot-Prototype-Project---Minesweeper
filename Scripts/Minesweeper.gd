@@ -14,9 +14,9 @@ var exploration_map: Array[Array] = []
 var mine_map: Array[Array] = []
 var mines_set: bool = false
 var can_touch: bool = true
+var game_difficulty: int = C.GameDifficulty.EASY
 
-var bombs_left: int = C.MINE_QUANTITY
-var explore_counter: int = 0
+var flags_left: int = C.MINE_QUANTITY[game_difficulty]
 
 func _ready():
 	reset_game()
@@ -36,9 +36,18 @@ func _input(event: InputEvent) -> void:
 		print_exploration_map()
 		print_mine_map()
 
+## SIGNALS
+
+func _on_difficulty_button_item_selected(index: int) -> void:
+	game_difficulty = index
+	reset_game()
+
 ## RESET TABLES
 
 func reset_game() -> void:
+	mines_set = false
+	can_touch = true
+	flags_left = C.MINE_QUANTITY[game_difficulty]
 	resize_screen()
 	reset_greentable()
 	reset_orangetable()
@@ -48,36 +57,52 @@ func reset_game() -> void:
 	set_mine_map()
 
 func resize_screen() -> void:
-	get_window().content_scale_size = Vector2i(C.MAP_SIZE_X * C.TILE_SIZE, C.MAP_SIZE_Y * C.TILE_SIZE + 40)
+	get_window().content_scale_size = Vector2i(C.MAP_SIZE_X[game_difficulty] * C.TILE_SIZE, C.MAP_SIZE_Y[game_difficulty] * C.TILE_SIZE + C.UI_SIZE)
 	call_deferred("emit_signal", "screen_resized", get_window().content_scale_size)
 	
-func reset_greentable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+func reset_greentable():
 	var atlas: Vector2i
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	
 	for y in range(0, max_y):
 		for x in range(0, max_x):
 			atlas = get_greentable_atlas(x,y)
 			greentable.set_cell(Vector2i(x,y), 0, atlas)
 
-func reset_orangetable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+func reset_orangetable():
 	var atlas: Vector2i
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	
 	for y in range(0, max_y):
 		for x in range(0, max_x):
 			atlas = get_orangetable_atlas(x,y)
 			orangetable.set_cell(Vector2i(x,y), 0, atlas)
 
-func reset_flagtable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+func reset_flagtable():
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	
 	for y in range(0, max_y):
 		for x in range(0, max_x):
 			flagtable.erase_cell(Vector2i(x,y))
 			
-func reset_spritetable(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y):
+func reset_spritetable():
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	
 	for y in range(0, max_y):
 		for x in range(0, max_x):
 			spritetable.erase_cell(Vector2i(x,y))
 
 ## MINE MAP
 
-func set_mine_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -> void:
+func set_mine_map() -> void:
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	mine_map.clear()
+	
 	for y in range(0, max_y):
 		var col: Array[int] = []
 		for x in range(0, max_x):
@@ -86,7 +111,7 @@ func set_mine_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -> void:
 
 func set_mines(first_pos: Vector2i) -> void:
 	# Set number of mines.
-	var mine_quantity = C.MINE_QUANTITY
+	var mine_quantity = C.MINE_QUANTITY[game_difficulty]
 	# Save mine positions.
 	var mine_positions: Array[Vector2i] = []
 	# Mines added counter.
@@ -94,8 +119,8 @@ func set_mines(first_pos: Vector2i) -> void:
 	
 	while mines_added < mine_quantity:
 		# Random position for mine.
-		var x = randi() % C.MAP_SIZE_X
-		var y = randi() % C.MAP_SIZE_Y
+		var x = randi() % C.MAP_SIZE_X[game_difficulty]
+		var y = randi() % C.MAP_SIZE_Y[game_difficulty]
 		var new_mine: Vector2i = Vector2i(x,y)
 		
 		# Check if not repeated and not at first clicked cell.
@@ -128,13 +153,13 @@ func set_proximity(mine_positions: Array[Vector2i]) -> void:
 				mine_map[y][x] += 1
 
 func out_of_map(x: int, y: int):
-	if x < 0 or x >= C.MAP_SIZE_X or y < 0 or y >= C.MAP_SIZE_Y:
+	if x < 0 or x >= C.MAP_SIZE_X[game_difficulty] or y < 0 or y >= C.MAP_SIZE_Y[game_difficulty]:
 		return true
 	return false
 
 func set_spritetable() -> void:
-	for x in C.MAP_SIZE_X:
-		for y in C.MAP_SIZE_Y:
+	for x in C.MAP_SIZE_X[game_difficulty]:
+		for y in C.MAP_SIZE_Y[game_difficulty]:
 			if mine_map[y][x] > 0 and mine_map[y][x] <= 8:
 				var atlas_coords = C.number_tile[mine_map[y][x] - 1]
 				spritetable.set_cell(Vector2i(x,y), 0, atlas_coords)
@@ -148,7 +173,11 @@ func print_mine_map() -> void:
 
 ## EXPLORATION MAP
 
-func set_exploration_map(max_x: int = C.MAP_SIZE_X, max_y: int = C.MAP_SIZE_Y) -> void:
+func set_exploration_map() -> void:
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	exploration_map.clear()
+	
 	for y in range(0, max_y):
 		var col: Array[int] = []
 		for x in range(0, max_x):
@@ -227,8 +256,8 @@ func explode() -> void:
 	add_child(timer)
 	
 	# Go through the map.
-	for y in C.MAP_SIZE_Y:
-		for x in C.MAP_SIZE_X:
+	for y in C.MAP_SIZE_Y[game_difficulty]:
+		for x in C.MAP_SIZE_X[game_difficulty]:
 			timer.start()
 			
 			# If flag where not bomb.
@@ -276,6 +305,11 @@ func get_orangetable_atlas(x: int, y: int) -> Vector2:
 
 func get_clicked_tile() -> Vector2i:
 	var local_pos = get_local_mouse_position()
-	if local_pos.x < 0 or local_pos.y < 0:
+	
+	if local_pos.x < 0 or \
+	local_pos.x >= C.MAP_SIZE_X[game_difficulty] * C.TILE_SIZE or \
+	local_pos.y < 0 or \
+	local_pos.y >= C.MAP_SIZE_Y[game_difficulty] * C.TILE_SIZE:
 		return Vector2i(-100, -100)
+		
 	return Vector2i(local_pos.x / C.TILE_SIZE, local_pos.y / C.TILE_SIZE)

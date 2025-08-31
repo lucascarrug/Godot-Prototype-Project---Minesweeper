@@ -31,15 +31,15 @@ var number_tile = [
 	EIGHT_TILE]
 
 ## Mine map.
-const MINE = -1
-const MINE_QUANTITY = 10
+const MINE: int = -1
+const MINE_QUANTITY: Array[int] = [10, 40, 90]
 
 ## Exploration map.
 enum ExplorationMapStates {NOT_EXPLORED, EXPLORED, FLAG}
 
 ## TilemapLayer map.
-const MAP_SIZE_X: int = 9
-const MAP_SIZE_Y: int = 9
+const MAP_SIZE_X: Array[int] = [9, 16, 30]
+const MAP_SIZE_Y: Array[int] = [9, 16, 30]
 
 ## Extras.
 var NEIGHTBORS := [
@@ -47,3 +47,9 @@ var NEIGHTBORS := [
 		Vector2i(-1,  0),                  Vector2i(1,  0),
 		Vector2i(-1,  1), Vector2i(0,  1), Vector2i(1,  1),
 	]
+
+## Difficulty.
+enum GameDifficulty {EASY = 0, MEDIUM = 1, HARD = 2}
+
+## UI.
+const UI_SIZE: int = 40
