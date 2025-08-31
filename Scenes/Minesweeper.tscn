@@ -46,3 +46,7 @@ tile_set = SubResource("TileSet_versi")
 
 [node name="OrangeTable" type="TileMapLayer" parent="."]
 tile_set = SubResource("TileSet_versi")
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.01
+one_shot = true

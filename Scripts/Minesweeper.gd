@@ -3,11 +3,15 @@ class_name Minesweeper
 
 signal flags_left_modified(value: int)
 signal mines_explode
+signal win_game
+signal exploding_animation_ended
 
 @export var flagtable: TileMapLayer
 @export var greentable: TileMapLayer
 @export var spritetable: TileMapLayer
 @export var orangetable: TileMapLayer
+
+@onready var timer: Timer = $Timer
 
 var C = Constants.new()
 
@@ -17,22 +21,26 @@ var mines_set: bool = false
 var can_touch: bool = true
 var game_difficulty: int = C.GameDifficulty.EASY
 
+var exploded: bool = false
+var faster_explode_flag: bool = false
+var exploding_animation_flag: bool = false
+
 var flags_left: int = C.MINE_QUANTITY[game_difficulty]
 
 func _ready():
 	reset_game()
 
 func _input(event: InputEvent) -> void:
-	if not can_touch:
-		return
-		
-	if Input.is_action_just_pressed("left_click"):
+	if Input.is_action_just_pressed("left_click") and can_touch:
 		var tile_pos: Vector2i = get_clicked_tile()
 		if not mines_set: set_mines(tile_pos)
 		if tile_pos != Vector2i(-100,-100): explore(tile_pos)
-	if Input.is_action_just_pressed("right_click"):
+	if Input.is_action_just_pressed("right_click") and can_touch:
 		var tile_pos: Vector2i = get_clicked_tile()
 		toggle_flag(tile_pos)
+	if Input.is_action_just_pressed("left_click") and exploded: 
+		if faster_explode_flag: faster_explode()
+		faster_explode_flag = true
 	if Input.is_action_just_pressed("space"):
 		print_exploration_map()
 		print_mine_map()
@@ -48,6 +56,9 @@ func _on_difficulty_button_item_selected(index: int) -> void:
 func reset_game() -> void:
 	mines_set = false
 	can_touch = true
+	exploded = false
+	faster_explode_flag = false
+	exploding_animation_flag = false
 	flags_left = C.MINE_QUANTITY[game_difficulty]
 	call_deferred("emit_signal", "flags_left_modified", flags_left)
 	resize_screen()
@@ -130,6 +141,7 @@ func set_mines(first_pos: Vector2i) -> void:
 		
 		# Add if mine position is valid.
 		mine_positions.append(new_mine)
+		#flagtable.set_cell(new_mine, 0, C.FLAG_TILE)
 		mines_added += 1
 	
 	# Put mines.
@@ -205,6 +217,8 @@ func explore(tile_pos: Vector2i) -> void:
 		exploration_map[y][x] = C.ExplorationMapStates.EXPLORED
 		greentable.erase_cell(tile_pos)
 		
+	if check_win(): win()
+		
 func explore_neightbors(first_neightbor: Vector2i) -> void:
 	# Set incomming and repeated neightbors arrays.
 	var queue: Array[Vector2i] = [first_neightbor]
@@ -257,17 +271,17 @@ func explore_neightbors(first_neightbor: Vector2i) -> void:
 func explode() -> void:
 	# Can't touch more.
 	can_touch = false
+	exploded = true
 	mines_explode.emit()
 	
 	# Create timer.
-	var timer = Timer.new()
 	timer.wait_time = 0.01
 	timer.one_shot = true
-	add_child(timer)
 	
 	# Go through the map.
 	for y in C.MAP_SIZE_Y[game_difficulty]:
 		for x in C.MAP_SIZE_X[game_difficulty]:
+			if exploding_animation_flag: return
 			timer.start()
 			
 			# If flag where not bomb.
@@ -282,6 +296,24 @@ func explode() -> void:
 				
 			# If explored not wait.
 			if exploration_map[y][x] == 0: await timer.timeout
+	
+	exploding_animation_ended.emit()
+
+func faster_explode() -> void:
+	# Go through the map.
+	for y in C.MAP_SIZE_Y[game_difficulty]:
+		for x in C.MAP_SIZE_X[game_difficulty]:
+			# If flag where not bomb.
+			if mine_map[y][x] != C.MINE and exploration_map[y][x] == C.ExplorationMapStates.FLAG:
+				spritetable.set_cell(Vector2i(x,y), 0, C.CROSS_TILE)
+			# If flag where bomb.
+			if mine_map[y][x] == C.MINE and exploration_map[y][x] == C.ExplorationMapStates.FLAG:
+				pass
+			else:
+				greentable.erase_cell(Vector2i(x,y))
+	
+	exploding_animation_flag = true
+	exploding_animation_ended.emit()
 
 func toggle_flag(tile_pos: Vector2i) -> void:
 	var x = tile_pos.x
@@ -327,3 +359,22 @@ func get_clicked_tile() -> Vector2i:
 		return Vector2i(-100, -100)
 		
 	return Vector2i(local_pos.x / C.TILE_SIZE, local_pos.y / C.TILE_SIZE)
+
+func check_win() -> bool:
+	var max_x = C.MAP_SIZE_X[game_difficulty]
+	var max_y = C.MAP_SIZE_Y[game_difficulty]
+	var cells_explored: int = 0
+	
+	for y in range(0, max_y):
+		for x in range(0, max_x):
+			if exploration_map[y][x] == C.ExplorationMapStates.EXPLORED:
+				cells_explored += 1
+
+	print(cells_explored, " >= ", max_x * max_y - C.MINE_QUANTITY[game_difficulty])
+	if cells_explored >= (max_x * max_y - C.MINE_QUANTITY[game_difficulty]):
+		return true
+	return false
+
+func win() -> void:
+	can_touch = false
+	win_game.emit()

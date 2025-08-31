@@ -31,7 +31,6 @@ alignment = 1
 text_overrun_behavior = 2
 expand_icon = true
 selected = 0
-allow_reselect = true
 item_count = 3
 popup/item_0/text = "Fácil"
 popup/item_0/icon = ExtResource("1_hfhsn")
@@ -82,7 +81,9 @@ theme_override_fonts/font = ExtResource("6_48q88")
 theme_override_font_sizes/font_size = 22
 text = "99"
 
+[connection signal="exploding_animation_ended" from="Minesweeper" to="." method="_on_minesweeper_exploding_animation_ended"]
 [connection signal="flags_left_modified" from="Minesweeper" to="." method="_on_minesweeper_flags_left_modified"]
 [connection signal="mines_explode" from="Minesweeper" to="." method="_on_minesweeper_mines_explode"]
+[connection signal="win_game" from="Minesweeper" to="." method="_on_minesweeper_win_game"]
 [connection signal="item_selected" from="CanvasLayer/DifficultyButton" to="." method="_on_difficulty_button_item_selected"]
 [connection signal="item_selected" from="CanvasLayer/DifficultyButton" to="Minesweeper" method="_on_difficulty_button_item_selected"]
