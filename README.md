@@ -7,3 +7,6 @@
 <p>As I'm not very experienced with UIs, the UI code is kept simple and is not highly optimized.</p>
 <p>In addition, I designed the .png assets myself, but the text font comes from https://www.dafont.com/es/segment7.font</p>
 <br>
+
+## itch.io link
+https://alm3ndr018.itch.io/minesweeper
