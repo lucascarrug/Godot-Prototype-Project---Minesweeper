@@ -13,7 +13,7 @@ config_version=5
 config/name="Prototype Project - Minesweeper"
 run/main_scene="uid://dlrmlkpw214b6"
 config/features=PackedStringArray("4.4", "Forward Plus")
-config/icon="res://icon.svg"
+config/icon="uid://d1f5ha5qax6e8"
 
 [display]
 
